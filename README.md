@@ -1,4 +1,4 @@
-# Realtime App
+# Realtime App using Golang(Backend) and React(Frontend)
 
 This repository contains a small real-time backend service written in Go.  
 The goal of the project is to demonstrate how to structure a Go application properly while handling real-time data using WebSockets and deadline-aware processing.
