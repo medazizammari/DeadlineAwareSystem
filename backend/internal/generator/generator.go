@@ -8,7 +8,8 @@ import (
 )
 
 func Start(out chan<- domain.Event) {
-	ticker := time.NewTicker(50 * time.Millisecond)
+	ticker := time.NewTicker(2 * time.Second)
+
 	defer ticker.Stop()
 
 	for range ticker.C {
