@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -8,6 +9,7 @@ import (
 )
 
 func Start(out chan<- domain.Event) {
+	log.Println("GENERATOR STARTED")
 	ticker := time.NewTicker(2 * time.Second)
 
 	defer ticker.Stop()
@@ -21,8 +23,9 @@ func Start(out chan<- domain.Event) {
 
 		select {
 		case out <- event:
+			log.Println("GEN SENT", event.ID)
 		default:
-			// drop event → back-pressure by design
+			log.Println("GEN DROPPED", event.ID)
 		}
 	}
 }

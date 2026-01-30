@@ -1,20 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 import type { RealTimeEvent } from "../types/types";
 
+// 🔒 WebSocket singleton (one per browser tab)
+let ws: WebSocket | null = null;
+
+function getWebSocket() {
+  if (
+    ws &&
+    (ws.readyState === WebSocket.OPEN ||
+      ws.readyState === WebSocket.CONNECTING)
+  ) {
+    return ws;
+  }
+
+  ws = new WebSocket("ws://localhost:8080/ws");
+  return ws;
+}
+
 export default function useRealtimeEvents() {
   const [events, setEvents] = useState<RealTimeEvent[]>([]);
   const buffer = useRef<RealTimeEvent[]>([]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080/ws");
+    const socket = getWebSocket();
 
-    ws.onmessage = (msg) => {
+    const onMessage = (msg: MessageEvent) => {
       try {
         buffer.current.push(JSON.parse(msg.data));
       } catch {
         // ignore malformed message
       }
     };
+
+    socket.addEventListener("message", onMessage);
 
     let rafId = 0;
 
@@ -24,7 +42,7 @@ export default function useRealtimeEvents() {
 
         setEvents((prev) => {
           const next = [...prev, ...pending];
-          return next.slice(-50); // keep last 50 to avoid UI slowdown
+          return next.slice(-50); // keep last 50
         });
       }
 
@@ -34,8 +52,10 @@ export default function useRealtimeEvents() {
     rafId = requestAnimationFrame(flush);
 
     return () => {
-      ws.close();
+      socket.removeEventListener("message", onMessage);
       cancelAnimationFrame(rafId);
+      // ❗ DO NOT close the WebSocket here
+      // closing here causes double consumers on refresh/dev reload
     };
   }, []);
 

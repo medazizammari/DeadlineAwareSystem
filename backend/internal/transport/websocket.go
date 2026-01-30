@@ -2,6 +2,7 @@ package transport
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/medazizammari/real-time-deadline-aware-golang/internal/domain"
@@ -19,10 +20,12 @@ func Handler(events <-chan domain.Event) http.HandlerFunc {
 		if err != nil {
 			return
 		}
+		log.Println("WS CONNECT", r.RemoteAddr)
 		defer conn.Close()
 
 		for event := range events {
 			data, _ := json.Marshal(event)
+			log.Println("WS SEND", event.ID)
 			conn.WriteMessage(websocket.TextMessage, data)
 		}
 	}
