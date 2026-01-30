@@ -6,14 +6,12 @@ import (
 	"github.com/medazizammari/real-time-deadline-aware-golang/internal/processor"
 )
 
-func Start(out chan<- domain.Event) {
-	in := make(chan domain.Event, 10) // bounded buffer
-
-	go generator.Start(in)
+func Start(in chan domain.Event, out chan<- domain.Event) {
+	go generator.Start(in) // generator writes into in
 
 	go func() {
-		for event := range in {
-			processed := processor.Process(event)
+		for ev := range in { // pipeline reads from in
+			processed := processor.Process(ev)
 			out <- processed
 		}
 	}()
