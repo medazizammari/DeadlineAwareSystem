@@ -7,7 +7,7 @@ export default function App() {
 
   async function createEvent() {
     try {
-      const res = await fetch("http://localhost:8080/event", { method: "POST" });
+      const res = await fetch(`${import.meta.env.VITE_API_HTTP}/event`, { method: "POST" });
       if (!res.ok) {
         const text = await res.text();
         alert(`Create event failed: ${res.status} ${text}`);

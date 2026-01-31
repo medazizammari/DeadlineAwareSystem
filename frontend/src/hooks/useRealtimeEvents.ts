@@ -3,7 +3,6 @@ import type { RealTimeEvent } from "../types/types";
 
 // 🔒 WebSocket singleton (one per browser tab)
 let ws: WebSocket | null = null;
-
 function getWebSocket() {
   if (
     ws &&
@@ -13,9 +12,10 @@ function getWebSocket() {
     return ws;
   }
 
-  ws = new WebSocket("ws://localhost:8080/ws");
+  ws = new WebSocket(`${import.meta.env.VITE_API_WS}/ws`);
   return ws;
 }
+
 
 export default function useRealtimeEvents() {
   const [events, setEvents] = useState<RealTimeEvent[]>([]);
