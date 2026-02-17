@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { RealTimeEvent } from "../types/types";
 
-// 🔒 WebSocket singleton (one per browser tab)
+// One WS per browser tab
 let ws: WebSocket | null = null;
+
+function buildWsUrl() {
+  const scheme = window.location.protocol === "https:" ? "wss" : "ws";
+  return `${scheme}://${window.location.host}/ws`;
+}
+
 function getWebSocket() {
   if (
     ws &&
@@ -12,10 +18,17 @@ function getWebSocket() {
     return ws;
   }
 
-  ws = new WebSocket(`${import.meta.env.VITE_API_WS}/ws`);
+  ws = new WebSocket(buildWsUrl());
+
+  ws.addEventListener("close", () => {
+    ws = null;
+  });
+  ws.addEventListener("error", () => {
+    ws = null;
+  });
+
   return ws;
 }
-
 
 export default function useRealtimeEvents() {
   const [events, setEvents] = useState<RealTimeEvent[]>([]);
@@ -35,17 +48,11 @@ export default function useRealtimeEvents() {
     socket.addEventListener("message", onMessage);
 
     let rafId = 0;
-
     const flush = () => {
       if (buffer.current.length > 0) {
         const pending = buffer.current.splice(0, buffer.current.length);
-
-        setEvents((prev) => {
-          const next = [...prev, ...pending];
-          return next.slice(-50); // keep last 50
-        });
+        setEvents((prev) => [...prev, ...pending].slice(-50));
       }
-
       rafId = requestAnimationFrame(flush);
     };
 
@@ -54,8 +61,6 @@ export default function useRealtimeEvents() {
     return () => {
       socket.removeEventListener("message", onMessage);
       cancelAnimationFrame(rafId);
-      // ❗ DO NOT close the WebSocket here
-      // closing here causes double consumers on refresh/dev reload
     };
   }, []);
 

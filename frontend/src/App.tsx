@@ -5,17 +5,19 @@ import EventsTable from "./components/EventsTable";
 export default function App() {
   const events = useRealtimeEvents();
 
-  async function createEvent() {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_HTTP}/event`, { method: "POST" });
-      if (!res.ok) {
-        const text = await res.text();
-        alert(`Create event failed: ${res.status} ${text}`);
+    async function createEvent() {
+      try {
+        const res = await fetch("/event", { method: "POST" });
+
+        if (!res.ok) {
+          const text = await res.text();
+          alert(`Create event failed: ${res.status} ${text}`);
+        }
+      } catch (e) {
+        alert("Backend not reachable (check docker compose / nginx proxy)");
       }
-    } catch {
-      alert("Backend not reachable (is Go server running on :8080?)");
     }
-  }
+
 
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: 16 }}>
