@@ -50,7 +50,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: medazizammari
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & push backend
@@ -59,8 +59,8 @@ jobs:
           context: ./backend
           push: true
           tags: |
-            ghcr.io/medazizammari/deadline-backend:latest
-            ghcr.io/medazizammari/deadline-backend:${{ github.sha }}
+            ghcr.io/medazizammari/deadlineawaresystem-backend:latest
+            ghcr.io/medazizammari/deadlineawaresystem-backend:${{ github.sha }}
 
       - name: Build & push frontend
         uses: docker/build-push-action@v6
@@ -68,8 +68,8 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            ghcr.io/medazizammari/deadline-frontend:latest
-            ghcr.io/medazizammari/deadline-frontend:${{ github.sha }}
+            ghcr.io/medazizammari/deadlineawaresystem-frontend:latest
+            ghcr.io/medazizammari/deadlineawaresystem-frontend:${{ github.sha }}
 
   deploy:
     needs: build_and_push
@@ -83,7 +83,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-              cd /home/administrator/apps/deadline
-              docker compose -f docker-compose-prod.yml pull
-              docker compose -f docker-compose-prod.yml up -d
-              docker image prune -f
+            set -e
+            cd /home/administrator/apps/deadline
+            docker compose -f docker-compose-prod.yml pull
+            docker compose -f docker-compose-prod.yml up -d
+            docker image prune -f
