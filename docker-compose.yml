@@ -16,8 +16,13 @@ services:
       timeout: 3s
       retries: 20
   backend:
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/deadline?sslmode=disable
     build:
       context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "8080:8080"
 
@@ -28,3 +33,7 @@ services:
       - "5173:80"
     depends_on:
       - backend
+volumes:
+  pgdata:
+
+  
