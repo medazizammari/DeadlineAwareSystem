@@ -8,13 +8,10 @@ import (
 	"github.com/medazizammari/real-time-deadline-aware-golang/internal/domain"
 )
 
-func Start(out chan<- domain.Event) {
+func Start(trigger <-chan struct{}, out chan<- domain.Event) {
 	log.Println("GENERATOR STARTED")
-	ticker := time.NewTicker(2 * time.Second)
+	for range trigger {
 
-	defer ticker.Stop()
-
-	for range ticker.C {
 		event := domain.Event{
 			ID:         uuid.New().String(),
 			CreatedAt:  time.Now(),
